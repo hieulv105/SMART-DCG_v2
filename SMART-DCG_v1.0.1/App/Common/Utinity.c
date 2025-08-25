@@ -1,0 +1,218 @@
+/*
+ * Utinity.c
+ *
+ *  Created on: Sep 12, 2024
+ *      Author: Admin
+ */
+#include "main.h"
+#include "iwdg.h"
+
+#include "Utinity.h"
+
+sys_para_t systemParameter;
+IOpin_t IOpin[IO_PIN_NUMBS];
+
+
+/**
+ * @brief Init all IO pin parameters
+ * @param none
+ * @retval none
+ */
+void IO_init(void)
+{
+	for (uint8_t i = 0; i < IO_PIN_NUMBS; i++)
+	{
+		IOpin[i].mode = IO_INPUT_VOLTAGE;
+
+		if (i == 0)
+		{
+//			IOpin[i].inputModePin.port = IO_MODE1_GPIO_Port;
+//			IOpin[i].inputModePin.pin = IO_MODE1_Pin;
+			IOpin[i].outputPin.port = OUT_WATCHDOG_GPIO_Port;
+			IOpin[i].outputPin.pin = OUT_WATCHDOG_Pin;
+			continue;
+		}
+		if (i == 1)
+		{
+//			IOpin[i].inputModePin.port = IO_MODE2_GPIO_Port;
+//			IOpin[i].inputModePin.pin = IO_MODE2_Pin;
+			IOpin[i].outputPin.port = OUT_ALARM_GPIO_Port;
+			IOpin[i].outputPin.pin = OUT_ALARM_Pin;
+			continue;
+		}
+	}
+}
+
+/**
+ * @brief Set IO pin active mode
+ * @param pin: Number of IO pin to set active mode
+ * @param mode: Mode to set IO pin in IO_mode_t type
+ * @retval none
+ */
+void IO_set_mode(uint8_t pin, IO_mode_t mode)
+{
+	if (pin >= IO_PIN_NUMBS)
+		pin = IO_PIN_NUMBS - 1;
+
+	switch (mode)
+	{
+		case IO_OUTPUT_OD:		// 2
+//			HAL_GPIO_WritePin(IOpin[pin].inputModePin.port,	IOpin[pin].inputModePin.pin, GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(IOpin[pin].outputPin.port, IOpin[pin].outputPin.pin, GPIO_PIN_RESET);
+			IOpin[pin].mode = IO_OUTPUT_OD;
+			break;
+		case IO_INPUT_CURRENT: // 1
+//			HAL_GPIO_WritePin(IOpin[pin].inputModePin.port,	IOpin[pin].inputModePin.pin, GPIO_PIN_SET);
+//			HAL_GPIO_WritePin(IOpin[pin].outputPin.port, IOpin[pin].outputPin.pin, GPIO_PIN_RESET);
+			IOpin[pin].mode = IO_INPUT_CURRENT;
+			break;
+		default:
+//			HAL_GPIO_WritePin(IOpin[pin].inputModePin.port,	IOpin[pin].inputModePin.pin, GPIO_PIN_RESET);
+//			HAL_GPIO_WritePin(IOpin[pin].outputPin.port, IOpin[pin].outputPin.pin, GPIO_PIN_RESET);
+			IOpin[pin].mode = IO_INPUT_VOLTAGE;
+			break;
+	}
+}
+
+/**
+ * @brief Get IO pin active mode
+ * @param pin: number of pin ti get active mode
+ * @retval Active mode of IO pin in IO_mode_t type
+ */
+IO_mode_t IO_get_mode(uint8_t pin)
+{
+	if (pin >= IO_PIN_NUMBS)
+		pin = IO_PIN_NUMBS - 1;
+
+	return IOpin[pin].mode;
+}
+
+/**
+ * @brief Set output stage
+ * @param pin: number of pin to set output stage
+ * @param stage: Stage set to pin IO with GPIO_PinState type
+ * @retval HAL_OK if IO pin in output mode else return HAL_ERROR
+ */
+HAL_StatusTypeDef IO_set_output(uint8_t pin, GPIO_PinState state)
+{
+	if (pin >= IO_PIN_NUMBS)
+		pin = IO_PIN_NUMBS - 1;
+
+//	if (IOpin[pin].mode != IO_OUTPUT_OD)
+//		return HAL_ERROR;
+
+	HAL_GPIO_WritePin(IOpin[pin].outputPin.port, IOpin[pin].outputPin.pin, state);
+
+	return HAL_OK;
+}
+
+/**
+ * @brief Get output state of IO pin
+ * @param pin: number of pin to get output state
+ * @retval State of output pin in GPIO_Pinstate type
+ */
+GPIO_PinState IO_get_ouput(uint8_t pin)
+{
+	if (pin >= IO_PIN_NUMBS)
+		pin = IO_PIN_NUMBS - 1;
+
+	return HAL_GPIO_ReadPin(IOpin[pin].outputPin.port, IOpin[pin].outputPin.pin);
+}
+
+
+
+
+void LED_task(void)
+{
+	static uint8_t ledTick = 0;
+	static enum sys_stage_en preStage = sys_stage_normal;
+
+	if (preStage != systemParameter.sysStage)
+	{
+		preStage = systemParameter.sysStage;
+		ledTick = 0;
+		HAL_GPIO_WritePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin,	GPIO_PIN_SET);
+	}
+	switch (systemParameter.sysStage)
+	{
+		case sys_stage_boardOverHeat:
+			if (ledTick >= LED_DELAY_500MS)
+			{
+				ledTick = 0;
+				HAL_GPIO_TogglePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin);
+			}
+			break;
+		case sys_stage_mcuOverHeat:
+			if (ledTick >= LED_DELAY_500MS)
+			{
+				ledTick = 0;
+				HAL_GPIO_TogglePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin);
+			}
+			break;
+		case sys_stage_mpuReset:
+			if (ledTick >= LED_DELAY_1S)
+			{
+				ledTick = 0;
+				HAL_GPIO_TogglePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin);
+			}
+			break;
+		default:
+			if (ledTick >= LED_DELAY_3S)
+			{
+				ledTick = 0;
+				HAL_GPIO_TogglePin(LED_STATUS_GPIO_Port, LED_STATUS_Pin);
+			}
+			break;
+	}
+	ledTick++;
+}
+
+
+void WDT_task(void)
+{
+	static uint8_t preStageWDT = 0;
+
+	HAL_IWDG_Refresh(&hiwdg);
+//	LL_IWDG_ReloadCounter(IWDG);
+
+	if (systemParameter.WDT_parameters.mpuWDTdelayTime >= MPU_WDT_DELAY_TIME)
+	{
+		if (systemParameter.WDT_parameters.mpuWDTenable)
+		{
+			if (systemParameter.WDT_parameters.mpuWDTwaitTime == 0)
+			{
+				if (systemParameter.WDT_parameters.mpuWDTcount >= MPU_WDT_OVERTIME)
+				{
+					HAL_GPIO_TogglePin(MPU_PWR_DIS_GPIO_Port, MPU_PWR_DIS_Pin);
+					if (HAL_GPIO_ReadPin(MPU_PWR_DIS_GPIO_Port,	MPU_PWR_DIS_Pin) == GPIO_PIN_SET)
+						systemParameter.WDT_parameters.mpuWDTwaitTime =	MPU_RESET_TIME;
+					else
+						systemParameter.WDT_parameters.mpuWDTwaitTime =	MPU_WAIT_FEEDBACK_TIME;
+				}
+				else
+					systemParameter.WDT_parameters.mpuWDTcount++;
+			}
+			else
+				systemParameter.WDT_parameters.mpuWDTwaitTime--;
+		}
+		else
+		{
+			if (preStageWDT != systemParameter.WDT_parameters.mpuWDTenable)
+			{
+				systemParameter.WDT_parameters.mpuWDTcount = 0;
+				systemParameter.WDT_parameters.mpuWDTwaitTime = 0;
+				systemParameter.WDT_parameters.mpuWDTupdateTime = MPU_WDT_UPDATE_TIME;
+				HAL_GPIO_WritePin(MPU_PWR_DIS_GPIO_Port, MPU_PWR_DIS_Pin, GPIO_PIN_RESET);
+			}
+			else
+			{
+				if (--systemParameter.WDT_parameters.mpuWDTupdateTime == 0)
+					systemParameter.WDT_parameters.mpuWDTenable = 1;
+			}
+		}
+		preStageWDT = systemParameter.WDT_parameters.mpuWDTenable;
+	}
+	else
+		systemParameter.WDT_parameters.mpuWDTdelayTime++;
+}
+

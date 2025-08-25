@@ -1,0 +1,8 @@
+*.o
+*.d
+*.elf
+*.hex
+*.bin
+build/*
+cppcheck-report.txt
+/Release/

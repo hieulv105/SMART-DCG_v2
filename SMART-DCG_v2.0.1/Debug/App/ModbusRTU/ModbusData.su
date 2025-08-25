@@ -1,0 +1,4 @@
+../App/ModbusRTU/ModbusData.c:10:6:LoadConfigData	4	static
+../App/ModbusRTU/ModbusData.c:27:6:WriteConfig	4	static
+../App/ModbusRTU/ModbusData.c:33:6:SaveConfig	4	static
+../App/ModbusRTU/ModbusData.c:39:6:ModbusData	16	static

@@ -1,0 +1,4 @@
+../App/Communicate/Communication.c:24:6:Communication_init	1
+../App/Communicate/Communication.c:30:6:USB_Reconnect	1
+../App/Communicate/Communication.c:38:6:Modbus_service	3
+../App/Communicate/Communication.c:70:6:ModbusTask	1

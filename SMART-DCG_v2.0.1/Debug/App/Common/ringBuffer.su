@@ -1,0 +1,9 @@
+../App/Common/ringBuffer.c:12:16:ringBuffer_creat	24	static
+../App/Common/ringBuffer.c:30:10:ringBuffer_write	32	static
+../App/Common/ringBuffer.c:50:10:ringBuffer_read	32	static
+../App/Common/ringBuffer.c:65:9:ringBuffer_peek	16	static
+../App/Common/ringBuffer.c:72:9:ringBuffer_find	24	static
+../App/Common/ringBuffer.c:87:10:ringBuffer_getLength	16	static
+../App/Common/ringBuffer.c:94:6:ringBuffer_setMode	16	static
+../App/Common/ringBuffer.c:99:6:ringBuffer_flush	24	static
+../App/Common/ringBuffer.c:107:6:ringBuffer_delete	16	static

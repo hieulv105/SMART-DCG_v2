@@ -1,0 +1,10 @@
+../App/ModbusRTU/modbus_RTU.c:50:10:Modbus_Process	13
+../App/ModbusRTU/modbus_RTU.c:139:10:Modbus_Exeption_Response	1
+../App/ModbusRTU/modbus_RTU.c:161:10:Modbus_FC1_ReadCoilStatus	5
+../App/ModbusRTU/modbus_RTU.c:227:10:Modbus_FC2_ReadDisceteInput	5
+../App/ModbusRTU/modbus_RTU.c:306:10:Modbus_FC3_ReadHoldingReg	4
+../App/ModbusRTU/modbus_RTU.c:367:10:Modbus_FC4_ReadInputReg	4
+../App/ModbusRTU/modbus_RTU.c:426:10:Modbus_FC5_ForceSingleCoil	4
+../App/ModbusRTU/modbus_RTU.c:488:10:Modbus_FC6_WriteSingleReg	2
+../App/ModbusRTU/modbus_RTU.c:540:10:Modbus_FC15_ForceMultiCoil	3
+../App/ModbusRTU/modbus_RTU.c:584:10:Modbus_FC16_WriteMultiReg	3

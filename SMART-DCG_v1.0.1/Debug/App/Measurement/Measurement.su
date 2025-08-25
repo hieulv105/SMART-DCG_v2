@@ -1,0 +1,6 @@
+../App/Measurement/Measurement.c:76:6:ADC_init	24	static
+../App/Measurement/Measurement.c:94:6:ADC_cap_temp_vol	24	static
+../App/Measurement/Measurement.c:105:7:get_board_temperature	8	static
+../App/Measurement/Measurement.c:115:7:get_DCIN_voltage	8	static
+../App/Measurement/Measurement.c:125:7:get_mcu_temperature	16	static
+../App/Measurement/Measurement.c:135:6:ADC_measure	8	static

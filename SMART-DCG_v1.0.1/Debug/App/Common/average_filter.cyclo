@@ -1,0 +1,5 @@
+../App/Common/average_filter.c:15:18:AVERAGE_FILTER_creat	2
+../App/Common/average_filter.c:34:7:AVERAGE_FILTER_update	2
+../App/Common/average_filter.c:46:7:AVERAGE_FILTER_getAverageValue	1
+../App/Common/average_filter.c:51:6:AVERAGE_FILTER_reset	1
+../App/Common/average_filter.c:58:6:AVERAGE_FILTER_delete	1
